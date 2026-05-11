@@ -13,6 +13,7 @@ dependencies = [
   "opencv-python",
   "numpy",
   "typer",
+  "PySide6",
 ]
 
 [project.optional-dependencies]
