@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         self.original_image = None
         self.annotated_image = None
         self.results = []
+        self.selected_index: int | None = None
 
         toolbar = self.addToolBar("main")
         a_open = QAction("打开 BMP 图片", self); a_open.triggered.connect(self.open_image)
@@ -33,6 +34,8 @@ class MainWindow(QMainWindow):
 
         center = QWidget(); layout = QHBoxLayout(center)
         self.params = ParamsPanel(); self.image_view = ImageView(); self.table = ResultTable()
+        self.image_view.bbox_selected.connect(self._on_image_bbox_selected)
+        self.table.row_selected.connect(self._on_table_row_selected)
         layout.addWidget(self.params, 1)
         layout.addWidget(self.image_view, 4)
         layout.addWidget(self.table, 2)
@@ -55,6 +58,9 @@ class MainWindow(QMainWindow):
             self.annotated_image = None
             self.results = []
             self.table.clear_results()
+            self.selected_index = None
+            self.image_view.set_detections([])
+            self.image_view.clear_selection()
             self.image_view.set_pixmap(self._to_pixmap(self.original_image))
             self.image_view.reset_view()
         except Exception as exc:  # noqa: BLE001
@@ -74,9 +80,13 @@ class MainWindow(QMainWindow):
                 invert=p.invert,
             )
             self.results = detector.detect(self.original_image)
+            self.selected_index = None
             self.annotated_image = draw_boxes(self.original_image, self.results, show_index=p.show_index)
             self.table.set_results(self.results)
-            self.image_view.set_pixmap(self._to_pixmap(self.annotated_image))
+            self.table.clear_selection()
+            self.image_view.set_pixmap(self._to_pixmap(self.original_image))
+            self.image_view.set_detections(self.results)
+            self.image_view.clear_selection()
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "错误", str(exc))
 
@@ -108,8 +118,32 @@ class MainWindow(QMainWindow):
             self.results = []
             self.annotated_image = None
             self.table.clear_results()
+            self.selected_index = None
+            self.image_view.set_detections([])
+            self.image_view.clear_selection()
             if self.original_image is not None:
                 self.image_view.set_pixmap(self._to_pixmap(self.original_image))
                 self.image_view.reset_view()
         except Exception as exc:  # noqa: BLE001
             QMessageBox.critical(self, "错误", str(exc))
+
+    def _on_image_bbox_selected(self, index: int | None) -> None:
+        self.selected_index = index
+        self.image_view.set_selected_index(index)
+        self.table.blockSignals(True)
+        if index is None:
+            self.table.clear_selection()
+        else:
+            self.table.select_detection(index)
+        self.table.blockSignals(False)
+
+    def _on_table_row_selected(self, index: int | None) -> None:
+        self.selected_index = index
+        self.image_view.set_selected_index(index)
+        if index is None:
+            return
+        detection = next((item for item in self.results if item.index == index), None)
+        if detection is None:
+            return
+        box = detection.bbox
+        self.image_view.centerOn(box.x + box.w / 2, box.y + box.h / 2)
