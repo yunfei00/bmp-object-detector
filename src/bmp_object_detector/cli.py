@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 
 from bmp_object_detector.detector.opencv_detector import OpenCVDetector
+from bmp_object_detector.gui.__main__ import run_gui
 from bmp_object_detector.io.image_io import load_bmp_image, save_detection_json, save_image
 from bmp_object_detector.visualization.draw import draw_boxes
 
@@ -23,16 +24,22 @@ def detect(
 
     image = load_bmp_image(input)
     detector = OpenCVDetector(min_area=min_area)
-    boxes = detector.detect(image)
+    results = detector.detect(image)
 
-    annotated = draw_boxes(image, boxes)
+    annotated = draw_boxes(image, results)
 
     output.mkdir(parents=True, exist_ok=True)
     image_path = output / "result.png"
     json_path = output / "result.json"
 
     save_image(image_path, annotated)
-    save_detection_json(json_path, input_path=input, image_shape=image.shape, boxes=boxes)
+    save_detection_json(json_path, input_path=input, image_shape=image.shape, results=results)
 
     typer.echo(f"Saved annotated image: {image_path}")
     typer.echo(f"Saved detection JSON: {json_path}")
+
+
+@app.command()
+def gui() -> None:
+    """Launch the PySide6 desktop GUI."""
+    run_gui()

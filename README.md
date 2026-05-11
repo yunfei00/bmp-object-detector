@@ -4,19 +4,24 @@
 
 ## 项目简介
 
-第一阶段实现了针对 `.bmp` 图片的目标检测流程：
+当前工程支持两种使用方式：
+
+1. 命令行检测（detect）
+2. Windows 桌面图形界面（PySide6 GUI）
+
+基础检测流程：
 
 1. 灰度化
 2. 高斯去噪
-3. 阈值分割（Otsu）
+3. 阈值分割（Otsu / Adaptive / Manual）
 4. 轮廓查找
-5. 过滤过小区域
-6. 计算外接矩形
-7. 在原图上绘制矩形框
+5. 面积过滤
+6. `boundingRect` 计算外接矩形
+7. 在图像副本上绘制矩形框
 
-最终输出：
-- 标注图：`output/result.png`
-- 检测结果：`output/result.json`
+最终可输出：
+- 标注图：`result.png`
+- 检测结果：`result.json`
 
 ## 安装方法
 
@@ -27,7 +32,7 @@ pip install -e .
 pip install -e .[dev]
 ```
 
-## 运行示例
+## 命令行运行示例
 
 ```bash
 python -m bmp_object_detector detect --input samples/test.bmp --output output
@@ -38,6 +43,15 @@ python -m bmp_object_detector detect --input samples/test.bmp --output output
 ```bash
 python -m bmp_object_detector --help
 ```
+
+## GUI 使用说明
+
+```bash
+pip install -e .
+python -m bmp_object_detector gui
+```
+
+GUI 功能包括：打开 BMP、参数配置、执行检测、结果表格显示、保存标注图、保存 JSON、清空结果。
 
 ## 输出 JSON 格式说明
 
@@ -55,20 +69,3 @@ python -m bmp_object_detector --help
   ]
 }
 ```
-
-字段含义：
-- `input`: 输入图片路径
-- `image_width`, `image_height`: 原图尺寸
-- `count`: 检测到的目标数量
-- `boxes`: 每个目标的外接矩形信息
-  - `x`, `y`: 左上角坐标
-  - `w`, `h`: 矩形宽高
-  - `area`: 矩形面积 (`w * h`)
-
-## 下一阶段计划
-
-第二阶段将引入 **YOLO 自定义目标检测**，包括：
-- 数据集标注与训练流程
-- 模型推理接口
-- 与当前 OpenCV 流程并行对比
-- 更复杂场景下的精度评估
