@@ -1,13 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_dynamic_libs, collect_submodules
 
-project_root = Path(__file__).resolve().parent
-icon_file = project_root / "assets" / "icon.ico"
-icon_path = str(icon_file) if icon_file.exists() else None
+project_root = Path(os.getcwd()).resolve()
+icon_path = project_root / "assets" / "icon.ico"
+icon_path = str(icon_path) if icon_path.exists() else None
 
 hiddenimports = (
     collect_submodules("PySide6")
