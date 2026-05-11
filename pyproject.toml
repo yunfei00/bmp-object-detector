@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bmp-object-detector"
+version = "0.1.0"
+description = "Detect objects in BMP images using classic OpenCV image processing"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "bmp-object-detector contributors" }]
+dependencies = [
+  "opencv-python",
+  "numpy",
+  "typer",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+bmp-object-detector = "bmp_object_detector.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
