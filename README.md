@@ -74,3 +74,24 @@ GUI 功能包括：打开 BMP、参数配置、执行检测、结果表格显示
   ]
 }
 ```
+
+## Windows EXE 自动打包与发布（GitHub Actions）
+
+- 当 `main` 分支发生 push 后，Actions 会自动构建 `BMPObjectDetector.exe`，可在对应 Workflow 的 Artifacts 下载测试构建产物。
+- 当 push 符合 `v*.*.*` 的 tag（例如 `v0.1.0`）后，Actions 会自动创建 GitHub Release，并上传正式版 `BMPObjectDetector.exe` 到 Release Assets。
+
+发布示例：
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+如果需要重新发布同一个版本：
+
+```bash
+git tag -d v0.1.0
+git push origin :refs/tags/v0.1.0
+git tag v0.1.0
+git push origin v0.1.0
+```
